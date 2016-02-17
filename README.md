@@ -1,6 +1,8 @@
 # zed-multi-input
 
-This sample demonstrates how to use multiple ZEDs into a single program.
+**This sample is designed to work with the ZED stereo camera only and requires the ZED SDK. For more information: https://www.stereolabs.com**
+
+It demonstrates how to use multiple ZEDs into a single program.
 Each grab is done in a separate thread.
 
 - Tested with 2 ZEDs in HD1080 @ 30fps (ASUS Sabertooth Z87 motherboard and GTX770)
