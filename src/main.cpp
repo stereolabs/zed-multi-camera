@@ -58,7 +58,7 @@ bool stop_signal;
 
 void grab_run(int x) {
     while (!stop_signal) {
-        bool res = zed[x]->grab(SENSING_MODE::RAW, 1, 1);
+        bool res = zed[x]->grab(SENSING_MODE::STANDARD, 1, 1);
 
         if (!res) {
             ZED_Timestamp[x] = zed[x]->getCameraTimestamp();
@@ -79,11 +79,14 @@ int main(int argc, char **argv) {
     return -1;
 #endif
 
+    sl::zed::InitParams params;
+    params.mode = MODE::PERFORMANCE;
+
     // Create
     for (int i = 0; i < NUM_CAMERAS; i++) {
         zed[i] = new Camera(ZED_RES, FPS, i);
 
-        ERRCODE err = zed[i]->init(MODE::PERFORMANCE, -1);
+        ERRCODE err = zed[i]->init(params);
 
         cout << "ZED N°" << i << " -> Result : " << errcode2str(err) << endl;
         if (err != SUCCESS) {

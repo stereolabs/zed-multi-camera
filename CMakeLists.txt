@@ -10,18 +10,30 @@ endif(COMMAND cmake_policy)
 SET(EXECUTABLE_OUTPUT_PATH ".")
 
 IF(WIN32) # Windows
-message(FATAL_ERROR "Multi ZED not available on Windows")
-EXIT()
+    message(FATAL_ERROR "Multi ZED not available on Windows")
+    EXIT()
 ELSE() # Linux
-find_package(ZED 0.9 REQUIRED)
+    find_package(ZED 1.0 REQUIRED)
+    find_package(Eigen3 REQUIRED)
+    
+    ##For Jetson, OpenCV4Tegra is based on OpenCV2.4
+    exec_program(uname ARGS -p OUTPUT_VARIABLE CMAKE_SYSTEM_NAME2)
+    if ( CMAKE_SYSTEM_NAME2 MATCHES "aarch64" OR CMAKE_SYSTEM_NAME2 MATCHES "armv7l" )
+        SET(OCV_VERSION "2.4")
+        SET(CUDA_VERSION "")
+    else()
+        SET(CUDA_VERSION "7.5")
+        SET(OCV_VERSION "3.1")
+    endif()
 ENDIF(WIN32)
 
-find_package(CUDA REQUIRED)
-find_package(OpenCV 2.4 COMPONENTS core highgui imgproc REQUIRED)
-
+find_package(OpenCV ${OCV_VERSION} COMPONENTS core highgui imgproc REQUIRED)
+find_package(CUDA ${CUDA_VERSION} REQUIRED)
+    
 include_directories(${CUDA_INCLUDE_DIRS})
 include_directories(${ZED_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 link_directories(${ZED_LIBRARY_DIR})
