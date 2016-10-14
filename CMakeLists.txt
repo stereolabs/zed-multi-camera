@@ -13,7 +13,7 @@ IF(WIN32) # Windows
     message(FATAL_ERROR "Multi ZED not available on Windows")
     EXIT()
 ELSE() # Linux
-    find_package(ZED 1.0 REQUIRED)
+    find_package(ZED 1.1 REQUIRED)
     find_package(Eigen3 REQUIRED)
     
     ##For Jetson, OpenCV4Tegra is based on OpenCV2.4
@@ -22,7 +22,7 @@ ELSE() # Linux
         SET(OCV_VERSION "2.4")
         SET(CUDA_VERSION "")
     else()
-        SET(CUDA_VERSION "7.5")
+        SET(CUDA_VERSION "8")
         SET(OCV_VERSION "3.1")
     endif()
 ENDIF(WIN32)
