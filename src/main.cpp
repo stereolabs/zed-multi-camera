@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2015, STEREOLABS.
+// Copyright (c) 2016, STEREOLABS.
 //
 // All rights reserved.
 //
@@ -25,19 +25,16 @@
  ** This only works for Linux                                                                                     **
  *******************************************************************************************************************/
 
-//standard includes
 #include <stdio.h>
 #include <string.h>
 #include <ctime>
 #include <chrono>
 #include <thread>
 
-//opencv includes
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-//ZED Includes
 #include <zed/Camera.hpp>
 
 using namespace sl::zed;
@@ -70,7 +67,6 @@ void grab_run(int x) {
     }
     delete zed[x];
 }
-//main  function
 
 int main(int argc, char **argv) {
 
@@ -82,7 +78,7 @@ int main(int argc, char **argv) {
     sl::zed::InitParams params;
     params.mode = MODE::PERFORMANCE;
 
-    // Create
+    // Create every ZED and init them
     for (int i = 0; i < NUM_CAMERAS; i++) {
         zed[i] = new Camera(ZED_RES, FPS, i);
 
@@ -101,20 +97,20 @@ int main(int argc, char **argv) {
 
     char key = ' ';
 
-    //Create both grabbing thread with the camera number as parameters
+    // Create each grabbing thread with the camera number as parameters
     std::vector<std::thread*> thread_vec;
     for (int i = 0; i < NUM_CAMERAS; i++)
         thread_vec.push_back(new std::thread(grab_run, i));
 
-    //Create windows for viewing results with OpenCV
+    // Create windows for viewing results with OpenCV
     cv::Size DisplaySize(720, 404);
 
     for (int i = 0; i < NUM_CAMERAS; i++)
         ZED_LRes[i] = cv::Mat(DisplaySize, CV_8UC4);
 
-    //loop until 'q' is pressed
+    // Loop until 'q' is pressed
     while (key != 'q') {
-        //Resize and imshow
+        // Resize and imshow
         for (int i = 0; i < NUM_CAMERAS; i++) {
             char wnd_name[21];
             sprintf(wnd_name, "ZED N° %d", i);
@@ -122,17 +118,16 @@ int main(int argc, char **argv) {
             cv::imshow(wnd_name, ZED_LRes[i]);
         }
 
-        //compare Timestamp between both camera (uncomment following line)
+        // Compare Timestamp between both camera (uncomment following line)
         //for (int i = 0; i < NUM_CAMERAS; i++) std::cout << " Timestamp " << i << ": " << ZED_Timestamp[i] << std::endl;
 
-        //get the Key
         key = cv::waitKey(20);
     }
 
-    //out --> tells both thread to finish
+    // Send the signal to stop every threads to finish
     stop_signal = true;
 
-    //end of thread --sync
+    // Wait for every thread to be stopped
     for (auto it : thread_vec) it->join();
 
     return 0;
