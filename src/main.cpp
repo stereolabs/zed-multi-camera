@@ -35,17 +35,16 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include <zed/Camera.hpp>
+#include <sl/Camera.hpp>
 
-using namespace sl::zed;
 using namespace std;
 
 const int NUM_CAMERAS = 2;
 const int FPS = 15;
-const ZEDResolution_mode ZED_RES = HD720;
+const sl::RESOLUTION ZED_RES = sl::RESOLUTION_HD720;
 
 
-Camera* zed[NUM_CAMERAS];
+sl::Camera* zed[NUM_CAMERAS];
 cv::Mat SbSResult[NUM_CAMERAS];
 cv::Mat ZED_LRes[NUM_CAMERAS];
 int width, height;
@@ -54,14 +53,17 @@ long long ZED_Timestamp[NUM_CAMERAS];
 bool stop_signal;
 
 void grab_run(int x) {
+	sl::Mat aux;
+	sl::RuntimeParameters rt_params;
     while (!stop_signal) {
-        bool res = zed[x]->grab(SENSING_MODE::STANDARD, 1, 1);
+        sl::ERROR_CODE res = zed[x]->grab(rt_params);
 
         if (!res) {
             ZED_Timestamp[x] = zed[x]->getCameraTimestamp();
-            //sl::zed::Mat depthMM = zed[x]->retrieveMeasure(MEASURE::DEPTH);
-            slMat2cvMat(zed[x]->retrieveImage(SIDE::LEFT)).copyTo(SbSResult[x](cv::Rect(0, 0, width, height)));
-            slMat2cvMat(zed[x]->normalizeMeasure(MEASURE::DISPARITY)).copyTo(SbSResult[x](cv::Rect(width, 0, width, height)));
+            zed[x]->retrieveImage(aux, sl::VIEW_LEFT, sl::MEM_CPU);
+            cv::Mat(aux.getHeight(), aux.getWidth(), CV_8UC4, aux.getPtr<sl::uchar1>(sl::MEM_CPU)).copyTo(SbSResult[x](cv::Rect(0, 0, width, height)));
+            zed[x]->retrieveImage(aux, sl::VIEW_DEPTH, sl::MEM_CPU);
+            cv::Mat(aux.getHeight(), aux.getWidth(), CV_8UC4, aux.getPtr<sl::uchar1>(sl::MEM_CPU)).copyTo(SbSResult[x](cv::Rect(width, 0, width, height)));
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
@@ -75,23 +77,26 @@ int main(int argc, char **argv) {
     return -1;
 #endif
 
-    sl::zed::InitParams params;
-    params.mode = MODE::PERFORMANCE;
+    sl::InitParameters params;
+    params.depth_mode = sl::DEPTH_MODE_PERFORMANCE;
+    params.camera_resolution = ZED_RES;
+    params.camera_fps = FPS;
 
     // Create every ZED and init them
     for (int i = 0; i < NUM_CAMERAS; i++) {
-        zed[i] = new Camera(ZED_RES, FPS, i);
+        zed[i] = new sl::Camera();
+        params.camera_linux_id = i;
 
-        ERRCODE err = zed[i]->init(params);
+        sl::ERROR_CODE err = zed[i]->open(params);
 
-        cout << "ZED N°" << i << " -> Result : " << errcode2str(err) << endl;
-        if (err != SUCCESS) {
+        cout << "ZED no. " << i << " -> Result : " << sl::errorCode2str(err) << endl;
+        if (err != sl::SUCCESS) {
             delete zed[i];
             return 1;
         }
 
-        width = zed[i]->getImageSize().width;
-        height = zed[i]->getImageSize().height;
+        width = zed[i]->getResolution().width;
+        height = zed[i]->getResolution().height;
         SbSResult[i] = cv::Mat(height, width * 2, CV_8UC4, 1);
     }
 
@@ -113,7 +118,7 @@ int main(int argc, char **argv) {
         // Resize and imshow
         for (int i = 0; i < NUM_CAMERAS; i++) {
             char wnd_name[21];
-            sprintf(wnd_name, "ZED N° %d", i);
+            sprintf(wnd_name, "ZED no. %d", i);
             cv::resize(SbSResult[i], ZED_LRes[i], DisplaySize);
             cv::imshow(wnd_name, ZED_LRes[i]);
         }
