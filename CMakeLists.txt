@@ -13,8 +13,7 @@ IF(WIN32) # Windows
     message(FATAL_ERROR "Multi ZED not available on Windows")
     EXIT()
 ELSE() # Linux
-    find_package(ZED 1.1 REQUIRED)
-    find_package(Eigen3 REQUIRED)
+    find_package(ZED 2.0 REQUIRED)
     
     ##For Jetson, OpenCV4Tegra is based on OpenCV2.4
     exec_program(uname ARGS -p OUTPUT_VARIABLE CMAKE_SYSTEM_NAME2)
@@ -33,7 +32,6 @@ find_package(CUDA ${CUDA_VERSION} REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 include_directories(${ZED_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
-include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 link_directories(${ZED_LIBRARY_DIR})

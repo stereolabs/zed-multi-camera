@@ -30,8 +30,8 @@ Open a terminal in the 'build' directory and execute the following command:
 
 ## How it works
 
-- Video capture for each camera is done in a separate thread for optimal performance. You can specify the number of ZED used by changing the [`NUM_CAMERAS`](https://github.com/stereolabs/zed-multi-input/blob/master/src/main.cpp#L42) parameter.
-- Each camera has its own timestamp (uncomment [this line](https://github.com/stereolabs/zed-multi-input/blob/master/src/main.cpp#L127) to display it). These timestamps can be used for device synchronization.
+- Video capture for each camera is done in a separate thread for optimal performance. You can specify the number of ZED used by changing the `NUM_CAMERAS` parameter.
+- Each camera has its own timestamp (uncomment a line to display it). These timestamps can be used for device synchronization.
 - OpenCV is used to display the images and depth maps. To stop the application, simply press 'q'.
 
 
