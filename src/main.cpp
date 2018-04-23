@@ -58,7 +58,7 @@ void grab_run(int x) {
     while (!stop_signal) {
         sl::ERROR_CODE res = zed[x]->grab(rt_params);
 
-        if (res != sl::SUCCESS) {
+        if (res == sl::SUCCESS) {
             ZED_Timestamp[x] = zed[x]->getCameraTimestamp();
             zed[x]->retrieveImage(aux, sl::VIEW_LEFT, sl::MEM_CPU);
             cv::Mat(aux.getHeight(), aux.getWidth(), CV_8UC4, aux.getPtr<sl::uchar1>(sl::MEM_CPU)).copyTo(SbSResult[x](cv::Rect(0, 0, width, height)));
