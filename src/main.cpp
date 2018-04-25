@@ -20,9 +20,8 @@
 
 
 /******************************************************************************************************************
- ** This sample demonstrates how to use two ZEDs with the ZED SDK, each grab are in a separated thread            **
- ** This sample has been tested with 3 ZEDs in HD720@30fps resolution                                             **
- ** This only works for Linux                                                                                     **
+ ** This sample demonstrates how to use two ZEDs with the ZED SDK, each grab are in a separate thread             **
+ ** This sample has been tested with 3 ZEDs in HD720@30fps resolution. Linux only.                                **
  *******************************************************************************************************************/
 
 #include <stdio.h>
@@ -39,16 +38,13 @@
 
 using namespace std;
 
-const int NUM_CAMERAS = 2;
-const int FPS = 15;
-const sl::RESOLUTION ZED_RES = sl::RESOLUTION_HD720;
+const int MAX_ZED = 12;
 
-
-sl::Camera* zed[NUM_CAMERAS];
-cv::Mat SbSResult[NUM_CAMERAS];
-cv::Mat ZED_LRes[NUM_CAMERAS];
+sl::Camera* zed[MAX_ZED];
+cv::Mat SbSResult[MAX_ZED];
+cv::Mat ZED_LRes[MAX_ZED];
 int width, height;
-long long ZED_Timestamp[NUM_CAMERAS];
+long long ZED_Timestamp[MAX_ZED];
 
 bool stop_signal;
 
@@ -67,33 +63,35 @@ void grab_run(int x) {
         }
         sl::sleep_ms(1);
     }
+    zed[x]->close();
     delete zed[x];
 }
 
 int main(int argc, char **argv) {
 
-#ifdef WIN32
-    std::cout << "Multiple ZEDs are not available under Windows" << std::endl;
-    return -1;
-#endif
-
     sl::InitParameters params;
     params.depth_mode = sl::DEPTH_MODE_PERFORMANCE;
-    params.camera_resolution = ZED_RES;
-    params.camera_fps = FPS;
+    params.camera_resolution = sl::RESOLUTION_HD1080;
+    params.camera_fps = 15;
 
+    std::vector<sl::DeviceProperties> devList = sl::Camera::getDeviceList();
+    int nb_detected_zed = devList.size();
+
+    std::cout << " Number of ZED Detected : " << nb_detected_zed << std::endl;
     // Create every ZED and init them
-    for (int i = 0; i < NUM_CAMERAS; i++) {
+    for (int i = 0; i < nb_detected_zed; i++) {
         zed[i] = new sl::Camera();
-        params.camera_linux_id = i;
+        params.input.setFromCameraID(i);
 
         sl::ERROR_CODE err = zed[i]->open(params);
 
-        cout << "ZED no. " << i << " -> Result : " << sl::errorCode2str(err) << endl;
+
         if (err != sl::SUCCESS) {
+            cout << "ZED no. " << i << " -> Result: " << sl::toString(err) << endl;
             delete zed[i];
             return 1;
-        }
+        } else
+            cout << "ZED no. " << i << " sn :" << zed[i] ->getCameraInformation().serial_number << " -> Result: " << sl::toString(err) << endl;
 
         width = zed[i]->getResolution().width;
         height = zed[i]->getResolution().height;
@@ -102,21 +100,21 @@ int main(int argc, char **argv) {
 
     char key = ' ';
 
-    // Create each grabbing thread with the camera number as parameters
+    // Create each grab thread with camera id as parameter
     std::vector<std::thread*> thread_vec;
-    for (int i = 0; i < NUM_CAMERAS; i++)
+    for (int i = 0; i < nb_detected_zed; i++)
         thread_vec.push_back(new std::thread(grab_run, i));
 
-    // Create windows for viewing results with OpenCV
+    // Create display windows with OpenCV
     cv::Size DisplaySize(720, 404);
 
-    for (int i = 0; i < NUM_CAMERAS; i++)
+    for (int i = 0; i < nb_detected_zed; i++)
         ZED_LRes[i] = cv::Mat(DisplaySize, CV_8UC4);
 
     // Loop until 'q' is pressed
     while (key != 'q') {
-        // Resize and imshow
-        for (int i = 0; i < NUM_CAMERAS; i++) {
+        // Resize and show images
+        for (int i = 0; i < nb_detected_zed; i++) {
             char wnd_name[21];
             sprintf(wnd_name, "ZED no. %d", i);
             cv::resize(SbSResult[i], ZED_LRes[i], DisplaySize);
@@ -124,12 +122,12 @@ int main(int argc, char **argv) {
         }
 
         // Compare Timestamp between both camera (uncomment following line)
-        //for (int i = 0; i < NUM_CAMERAS; i++) std::cout << " Timestamp " << i << ": " << ZED_Timestamp[i] << std::endl;
+        // for (int i = 0; i < MAX_ZED; i++) std::cout << " Timestamp " << i << ": " << ZED_Timestamp[i] << std::endl;
 
         key = cv::waitKey(20);
     }
 
-    // Send the signal to stop every threads to finish
+    // Send stop signal to end threads
     stop_signal = true;
 
     // Wait for every thread to be stopped

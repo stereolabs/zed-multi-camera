@@ -1,6 +1,6 @@
-SET(execName ZED_Multi_Input)
-
+SET(execName ZED_Multi_Camera)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
+PROJECT(${execName})
 
 if(COMMAND cmake_policy)
 	cmake_policy(SET CMP0003 OLD)
@@ -9,25 +9,10 @@ endif(COMMAND cmake_policy)
 
 SET(EXECUTABLE_OUTPUT_PATH ".")
 
-IF(WIN32) # Windows
-    message(FATAL_ERROR "Multi ZED not available on Windows")
-    EXIT()
-ELSE() # Linux
-    find_package(ZED 2.0 REQUIRED)
-    
-    ##For Jetson, OpenCV4Tegra is based on OpenCV2.4
-    exec_program(uname ARGS -p OUTPUT_VARIABLE CMAKE_SYSTEM_NAME2)
-    if ( CMAKE_SYSTEM_NAME2 MATCHES "aarch64" OR CMAKE_SYSTEM_NAME2 MATCHES "armv7l" )
-        SET(OCV_VERSION "2.4")
-        SET(CUDA_VERSION "")
-    else()
-        SET(CUDA_VERSION "8")
-        SET(OCV_VERSION "3.1")
-    endif()
-ENDIF(WIN32)
 
-find_package(OpenCV ${OCV_VERSION} COMPONENTS core highgui imgproc REQUIRED)
-find_package(CUDA ${CUDA_VERSION} REQUIRED)
+find_package(ZED 2 REQUIRED)
+find_package(OpenCV COMPONENTS core highgui imgproc REQUIRED)
+find_package(CUDA ${ZED_CUDA_VERSION} EXACT REQUIRED)
     
 include_directories(${CUDA_INCLUDE_DIRS})
 include_directories(${ZED_INCLUDE_DIRS})
@@ -38,18 +23,14 @@ link_directories(${ZED_LIBRARY_DIR})
 link_directories(${OpenCV_LIBRARY_DIRS})
 link_directories(${CUDA_LIBRARY_DIRS})
 
-SET(SRC_FOLDER src)
-FILE(GLOB_RECURSE SRC_FILES "${SRC_FOLDER}/*.cpp")
+FILE(GLOB_RECURSE SRC_FILES src/*.cpp)
 
 ADD_EXECUTABLE(${execName} ${SRC_FILES})
-set_property(TARGET ${execName} PROPERTY OUTPUT_NAME "ZED Multi Input")
-
-add_definitions(-std=c++0x)
+add_definitions(-std=c++11 -g -O3)
 
 TARGET_LINK_LIBRARIES(${execName}
-                        ${ZED_LIBRARIES}
-                        ${OpenCV_LIBRARIES}
-                        ${CUDA_LIBRARIES} ${CUDA_npps_LIBRARY} ${CUDA_nppi_LIBRARY}
-                    )
+			${ZED_LIBRARIES}
+			${OpenCV_LIBRARIES}
+			${CUDA_LIBRARIES} ${CUDA_npps_LIBRARY} ${CUDA_NPP_LIBRARIES_ZED} )
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3" ) # Release Perf mode

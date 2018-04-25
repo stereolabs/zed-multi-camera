@@ -1,21 +1,32 @@
 # Stereolabs ZED - Using multiple ZED
 
-This sample shows how to use multiple ZED cameras in a single application. Currently available on Linux only.
+This sample shows how to use multiple ZED cameras in a single application.
 
 ## Getting started
 
 - First, download the latest version of the ZED SDK on [stereolabs.com](https://www.stereolabs.com).
-- For more information, read the ZED [API documentation](https://www.stereolabs.com/developers/documentation/API/).
+- For more information, read the ZED [API documentation](https://www.stereolabs.com/developers/documentation/API/latest).
 
 ### Prerequisites
 
-- Ubuntu 16.04
-- [ZED SDK](https://www.stereolabs.com/developers/) and its dependencies ([CUDA](https://developer.nvidia.com/cuda-downloads),[OpenCV 3.1](http://opencv.org/downloads.html))
-
+- Windows 7 64bits or later, Ubuntu 16.04
+- [ZED SDK](https://www.stereolabs.com/developers/) and its dependencies ([CUDA](https://developer.nvidia.com/cuda-downloads), [OpenCV](https://github.com/opencv/opencv/releases))
 
 ## Build the program
 
-Download the sample. In the sample directory, open a terminal and execute the following command:
+Download the sample and follow these instructions:
+
+#### Build for Windows
+
+  - Create a folder called "build" in the source folder
+  - Open cmake-gui and select the source and build folders
+  - Generate the Visual Studio `Win64` solution
+  - Open the resulting solution and change the solution configuration to `Release`
+  - Build solution
+
+#### Build for Linux
+
+Open a terminal in the sample directory and execute the following command:
 
     mkdir build
     cd build
@@ -24,9 +35,10 @@ Download the sample. In the sample directory, open a terminal and execute the fo
 
 ## Run the program
 
-Open a terminal in the 'build' directory and execute the following command:
+- Navigate to the build directory and launch the executable file
+- Or open a terminal in the build directory and run the sample :
 
-    ./ZED\ Multi\ Input
+       ./ZED\ Multi\ Camera
 
 ## How it works
 
@@ -37,7 +49,7 @@ Open a terminal in the 'build' directory and execute the following command:
 
 ### Limitations
 
-- This sample works on Linux only.
+- This sample works on Windows with the latest firmware v.1523
 - USB bandwidth: The ZED  in 1080p30 mode generates around 250MB/s of image data. USB 3.0 maximum bandwidth is around 400MB/s, so the number of cameras, resolutions and framerates you can use on a single machine will be limited by the USB 3.0 controller on the motherboard. When bandwidth limit is exceeded, corrupted frames (green or purple frames, tearing) can appear.
 - Using a single USB 3.0 controller, here are configurations that we tested:
   - 2 ZEDs in HD1080 @ 15fps and HD720 @ 30fps
