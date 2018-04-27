@@ -21,7 +21,7 @@
 
 /******************************************************************************************************************
  ** This sample demonstrates how to use two ZEDs with the ZED SDK, each grab are in a separate thread             **
- ** This sample has been tested with 3 ZEDs in HD720@30fps resolution. Linux only.                                **
+ ** This sample has been tested with 3 ZEDs in HD720@30fps resolution.                                            **
  *******************************************************************************************************************/
 
 #include <stdio.h>
