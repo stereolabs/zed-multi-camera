@@ -87,11 +87,12 @@ int main(int argc, char **argv) {
 
 
         if (err != sl::SUCCESS) {
-            cout << "ZED no. " << i << " -> Result: " << sl::toString(err) << endl;
+            cout << zed[i]->getCameraInformation().camera_model << " n°" << i << " -> Result: " << sl::toString(err) << endl;
             delete zed[i];
             return 1;
         } else
-            cout << "ZED no. " << i << " sn :" << zed[i] ->getCameraInformation().serial_number << " -> Result: " << sl::toString(err) << endl;
+            cout << zed[i]->getCameraInformation().camera_model << " n°" << i << " SN " <<
+                zed[i] ->getCameraInformation().serial_number << " -> Result: " << sl::toString(err) << endl;
 
         width = zed[i]->getResolution().width;
         height = zed[i]->getResolution().height;
