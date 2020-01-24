@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2018, STEREOLABS.
+// Copyright (c) 2020, STEREOLABS.
 //
 // All rights reserved.
 //
@@ -21,7 +21,7 @@
 
 /******************************************************************************************************************
  ** This sample demonstrates how to use two ZEDs with the ZED SDK, each grab are in a separate thread             **
- ** This sample has been tested with 3 ZEDs in HD720@30fps resolution.                                            **
+ ** This sample has been tested with 3 ZEDs in HD720@30fps resolution. Linux only.                                **
  *******************************************************************************************************************/
 
 #include <stdio.h>
@@ -44,7 +44,7 @@ sl::Camera* zed[MAX_ZED];
 cv::Mat SbSResult[MAX_ZED];
 cv::Mat ZED_LRes[MAX_ZED];
 int width, height;
-long long ZED_Timestamp[MAX_ZED];
+sl::Timestamp ZED_Timestamp[MAX_ZED];
 
 bool stop_signal;
 
@@ -54,12 +54,12 @@ void grab_run(int x) {
     while (!stop_signal) {
         sl::ERROR_CODE res = zed[x]->grab(rt_params);
 
-        if (res == sl::SUCCESS) {
-            ZED_Timestamp[x] = zed[x]->getCameraTimestamp();
-            zed[x]->retrieveImage(aux, sl::VIEW_LEFT, sl::MEM_CPU);
-            cv::Mat(aux.getHeight(), aux.getWidth(), CV_8UC4, aux.getPtr<sl::uchar1>(sl::MEM_CPU)).copyTo(SbSResult[x](cv::Rect(0, 0, width, height)));
-            zed[x]->retrieveImage(aux, sl::VIEW_DEPTH, sl::MEM_CPU);
-            cv::Mat(aux.getHeight(), aux.getWidth(), CV_8UC4, aux.getPtr<sl::uchar1>(sl::MEM_CPU)).copyTo(SbSResult[x](cv::Rect(width, 0, width, height)));
+        if (res == sl::ERROR_CODE::SUCCESS) {
+            ZED_Timestamp[x] = zed[x]->getTimestamp(sl::TIME_REFERENCE::IMAGE);
+            zed[x]->retrieveImage(aux, sl::VIEW::LEFT, sl::MEM::CPU);
+            cv::Mat(aux.getHeight(), aux.getWidth(), CV_8UC4, aux.getPtr<sl::uchar1>(sl::MEM::CPU)).copyTo(SbSResult[x](cv::Rect(0, 0, width, height)));
+            zed[x]->retrieveImage(aux, sl::VIEW::DEPTH, sl::MEM::CPU);
+            cv::Mat(aux.getHeight(), aux.getWidth(), CV_8UC4, aux.getPtr<sl::uchar1>(sl::MEM::CPU)).copyTo(SbSResult[x](cv::Rect(width, 0, width, height)));
         }
         sl::sleep_ms(1);
     }
@@ -70,14 +70,15 @@ void grab_run(int x) {
 int main(int argc, char **argv) {
 
     sl::InitParameters params;
-    params.depth_mode = sl::DEPTH_MODE_PERFORMANCE;
-    params.camera_resolution = sl::RESOLUTION_HD1080;
+    params.depth_mode = sl::DEPTH_MODE::PERFORMANCE;
+    params.camera_resolution = sl::RESOLUTION::HD720;
     params.camera_fps = 15;
 
-    std::vector<sl::DeviceProperties> devList = sl::Camera::getDeviceList();
-    int nb_detected_zed = devList.size();
-
-    std::cout << " Number of ZED Detected : " << nb_detected_zed << std::endl;
+	std::vector<sl::DeviceProperties> devList = sl::Camera::getDeviceList();
+	int nb_detected_zed = devList.size();
+ 
+ 
+	std::cout << " Number of ZED Detected : " << nb_detected_zed << std::endl;
     // Create every ZED and init them
     for (int i = 0; i < nb_detected_zed; i++) {
         zed[i] = new sl::Camera();
@@ -86,16 +87,16 @@ int main(int argc, char **argv) {
         sl::ERROR_CODE err = zed[i]->open(params);
 
 
-        if (err != sl::SUCCESS) {
-            cout << zed[i]->getCameraInformation().camera_model << " n°" << i << " -> Result: " << sl::toString(err) << endl;
+        if (err != sl::ERROR_CODE::SUCCESS) {
+            cout << "ZED no. " << i << " -> Result: " << sl::toString(err) << endl;
             delete zed[i];
             return 1;
-        } else
-            cout << zed[i]->getCameraInformation().camera_model << " n°" << i << " SN " <<
-                zed[i] ->getCameraInformation().serial_number << " -> Result: " << sl::toString(err) << endl;
+        }
+        else
+            cout << "ZED no. " << i <<" sn :"<< zed[i] ->getCameraInformation().serial_number<< " -> Result: " << sl::toString(err) << endl;
 
-        width = zed[i]->getResolution().width;
-        height = zed[i]->getResolution().height;
+        width = zed[i]->getCameraInformation().camera_resolution.width;
+        height = zed[i]->getCameraInformation().camera_resolution.height;
         SbSResult[i] = cv::Mat(height, width * 2, CV_8UC4, 1);
     }
 
@@ -123,7 +124,16 @@ int main(int argc, char **argv) {
         }
 
         // Compare Timestamp between both camera (uncomment following line)
-        // for (int i = 0; i < MAX_ZED; i++) std::cout << " Timestamp " << i << ": " << ZED_Timestamp[i] << std::endl;
+       // for (int i = 0; i < MAX_ZED; i++) std::cout << " Timestamp " << i << ": " << ZED_Timestamp[i] << std::endl;
+
+		std::vector<sl::DeviceProperties> devList = sl::Camera::getDeviceList();
+		int nb_detected_zed = devList.size();
+		std::cout << " Number of ZED Detected : " << nb_detected_zed << std::endl;
+		for (int i = 0; i < nb_detected_zed; i++)
+		{
+			std::cout << " Camera Available : " << devList.at(i).camera_state << std::endl;
+		}
+
 
         key = cv::waitKey(20);
     }

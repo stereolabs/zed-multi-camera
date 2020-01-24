@@ -9,12 +9,12 @@ This sample shows how to use multiple ZED cameras in a single application.
 
 ### Prerequisites
 
-- Windows 7 64bits or later, Ubuntu 16.04
+- Windows 10, Ubuntu LTS
 - [ZED SDK](https://www.stereolabs.com/developers/) and its dependencies ([CUDA](https://developer.nvidia.com/cuda-downloads), [OpenCV](https://github.com/opencv/opencv/releases))
 
 ## Build the program
 
-Download the sample and follow the instructions below: [More](https://www.stereolabs.com/docs/getting-started/application-development/)
+Download the sample and follow these instructions:
 
 #### Build for Windows
 
