@@ -1,6 +1,5 @@
-SET(execName ZED_Multi_Camera)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
-PROJECT(${execName})
+PROJECT(ZED_Multi_Camera)
 
 option(LINK_SHARED_ZED "Link with the ZED SDK shared executable" ON)
 
@@ -16,26 +15,23 @@ endif(COMMAND cmake_policy)
 SET(EXECUTABLE_OUTPUT_PATH ".")
 
 IF(NOT MSVC)
-SET (SPECIAL_OS_LIBS pthread)
+    SET(SPECIAL_OS_LIBS "pthread" "X11")
 ENDIF()
 
 find_package(ZED 3 REQUIRED)
-find_package(OpenCV COMPONENTS core highgui imgproc REQUIRED)
-find_package(CUDA ${ZED_CUDA_VERSION} EXACT REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(CUDA ${ZED_CUDA_VERSION} REQUIRED)
     
 include_directories(${CUDA_INCLUDE_DIRS})
 include_directories(${ZED_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 link_directories(${ZED_LIBRARY_DIR})
 link_directories(${OpenCV_LIBRARY_DIRS})
 link_directories(${CUDA_LIBRARY_DIRS})
 
-FILE(GLOB_RECURSE SRC_FILES src/*.cpp)
-
-ADD_EXECUTABLE(${execName} ${SRC_FILES})
-add_definitions(-std=c++14 -g -O3)
+ADD_EXECUTABLE(${PROJECT_NAME} src/main.cpp)
+add_definitions(-std=c++14 -O3)
 
 if (LINK_SHARED_ZED)
     SET(ZED_LIBS ${ZED_LIBRARIES} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} ${SPECIAL_OS_LIBS})
@@ -43,5 +39,4 @@ else()
     SET(ZED_LIBS ${ZED_STATIC_LIBRARIES} ${CUDA_CUDA_LIBRARY} ${CUDA_LIBRARY} ${SPECIAL_OS_LIBS})
 endif()
 
-TARGET_LINK_LIBRARIES(${execName} ${ZED_LIBS} ${SPECIAL_OS_LIBS} ${OpenCV_LIBRARIES})
-
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ZED_LIBS} ${SPECIAL_OS_LIBS} ${OpenCV_LIBRARIES})
