@@ -5,7 +5,7 @@ This sample shows how to use multiple ZED cameras in a single application.
 ## Getting started
 
 - First, download the latest version of the ZED SDK on [stereolabs.com](https://www.stereolabs.com).
-- For more information, read the ZED [API documentation](https://www.stereolabs.com/developers/documentation/API/latest).
+- For more information, read the ZED [Documentation](https://www.stereolabs.com/docs/) and [API documentation](https://www.stereolabs.com/docs/api/) or our [Community page](https://community.stereolabs.com)
 
 ### Prerequisites
 
@@ -28,3 +28,6 @@ This sample shows how to use multiple ZED cameras in a single application.
   - 4 ZEDs in VGA @ 30fps
 - To use multiple ZED at full speed on a single computer, we recommend adding USB3.0 PCIe expansion cards.
 - You can also use multiple GPUs to load-balance computations (use `param.device` to select a GPU for a ZED) and improve performance.
+
+## Support
+If you need assistance go to our Community site at https://community.stereolabs.com/
